@@ -26,4 +26,4 @@ fmt:
 	./scripts/fmt.sh
 
 test:
-	go test -coverprofile cover.out `go list ./...`
+	go test -coverprofile cover.out `go list -buildvcs=false ./...`
