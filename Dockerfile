@@ -15,9 +15,9 @@
 ###############################################################################
 # Stage 1: Create the develop, test, and build environment
 ###############################################################################
-FROM  registry.access.redhat.com/ubi8/ubi-minimal:8.7 AS develop
+FROM  registry.access.redhat.com/ubi8/ubi-minimal:8.8 AS develop
 
-ARG GOLANG_VERSION=1.18.9
+ARG GOLANG_VERSION=1.19
 ARG PROTOC_VERSION=21.12
 
 USER root
@@ -82,7 +82,8 @@ LABEL image="build"
 COPY . ./
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /go/bin/server ./proxy/
+RUN go mod tidy && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /go/bin/server ./proxy/
 
 ###############################################################################
 # Stage 3: Copy binary to create the smallest final runtime image
