@@ -27,30 +27,34 @@ RUN go mod download
 # Copy the source
 COPY . ./
 
-
 # https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
 # don't provide "default" values (e.g. 'ARG TARGETARCH=amd64') for non-buildx environments,
 # see https://github.com/docker/buildx/issues/510
-ARG TARGETOS
-ARG TARGETARCH
-
 # Build the binaries using native go compiler from BUILDPLATFORM but compiled output for TARGETPLATFORM
 # https://www.docker.com/blog/faster-multi-platform-builds-dockerfile-cross-compilation-guide/
 
-RUN GOOS=${TARGETOS:-linux} \
-    GOARCH=${TARGETARCH:-amd64} \
-    CGO_ENABLED=0 \
-    GO111MODULE=on \
-    go build -a -o /go/bin/server ./proxy/
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /go/bin/server ./proxy/
 
 
 FROM registry.access.redhat.com/ubi8/ubi-micro@sha256:cf8d8796a2c07577b4adc8b598aa648b200cc6b4b5f78d2e13539711ea64f275 as runtime
 
 ARG USER=2000
 
+LABEL com.redhat.component="odh-mm-rest-proxy-container" \
+      name="managed-open-data-hub/odh-mm-rest-proxy-rhel8" \
+      description="Converts RESTfull API calls into gRPC" \
+      summary="odh-mm-rest-proxy" \
+      maintainer="['managed-open-data-hub@redhat.com']" \
+      io.openshift.expose-services="" \
+      io.k8s.display-name="modelmesh-rest-proxy" \
+      io.k8s.description="modelmesh-rest-proxy" \
+      com.redhat.license_terms="https://www.redhat.com/licenses/Red_Hat_Standard_EULA_20191108.pdf"
+
+
 USER ${USER}
 
-COPY version /etc/modelmesh-version
 COPY --from=build /go/bin/server /go/bin/server
 
 CMD ["/go/bin/server"]
