@@ -1,0 +1,40 @@
+#go-toolset:1.21
+FROM registry.redhat.io/ubi8/go-toolset@sha256:4ec05fd5b355106cc0d990021a05b71bbfb9231e4f5bdc0c5316515edf6a1c96 AS build
+
+LABEL image="build"
+
+USER root
+WORKDIR /opt/app
+
+COPY go.mod go.sum ./
+
+# Download dependencies before copying the source so they will be cached
+RUN go mod download
+
+# Copy the source
+COPY . ./
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /go/bin/server ./proxy/
+
+#ubi-micro
+FROM registry.access.redhat.com/ubi8/ubi-micro@sha256:cf8d8796a2c07577b4adc8b598aa648b200cc6b4b5f78d2e13539711ea64f275 as runtime
+
+ARG USER=2000
+
+LABEL com.redhat.component="odh-mm-rest-proxy-container" \
+      name="managed-open-data-hub/odh-mm-rest-proxy-rhel8" \
+      description="Converts RESTfull API calls into gRPC" \
+      summary="odh-mm-rest-proxy" \
+      maintainer="['managed-open-data-hub@redhat.com']" \
+      io.openshift.expose-services="" \
+      io.k8s.display-name="modelmesh-rest-proxy" \
+      io.k8s.description="modelmesh-rest-proxy" \
+      com.redhat.license_terms="https://www.redhat.com/licenses/Red_Hat_Standard_EULA_20191108.pdf"
+
+
+USER ${USER}
+
+COPY --from=build /go/bin/server /go/bin/server
+
+CMD ["/go/bin/server"]
