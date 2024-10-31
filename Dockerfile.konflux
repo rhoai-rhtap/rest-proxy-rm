@@ -30,6 +30,7 @@ LABEL com.redhat.component="odh-mm-rest-proxy-container" \
       io.openshift.expose-services="" \
       io.k8s.display-name="modelmesh-rest-proxy" \
       io.k8s.description="modelmesh-rest-proxy" \
+      io.openshift.tags="" \
       com.redhat.license_terms="https://www.redhat.com/licenses/Red_Hat_Standard_EULA_20191108.pdf"
 
 
