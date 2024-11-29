@@ -42,6 +42,7 @@
     "schedule": ["at any time"],
     "additionalBranchPrefix": "{{baseBranch}}/",
     "branchPrefix": "konflux/mintmaker/",
+    "pinDigests": true,
     "ignorePaths": [
       "**/Dockerfile",
       "!**/Dockerfile.konflux"
@@ -58,7 +59,6 @@
           "major",
           "minor",
           "pin",
-          "pinDigest",
           "patch",
           "bump"
         ],
